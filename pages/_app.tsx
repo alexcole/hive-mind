@@ -43,6 +43,8 @@ function MyApp({ Component, pageProps }: AppProps) {
               ? global.window.location.origin
               : (null as any),
         }}
+        useRefreshTokens={true}
+        cacheLocation="localstorage"
       >
         <ConvexProviderWithAuth0 client={convex}>
           <Unauthenticated2>
