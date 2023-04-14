@@ -22,9 +22,6 @@ const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
   verbose: true,
 })
 
-const Unauthenticated2 = Unauthenticated as any
-const Authenticated2 = Authenticated as any
-
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <main>
@@ -47,12 +44,12 @@ function MyApp({ Component, pageProps }: AppProps) {
         cacheLocation="localstorage"
       >
         <ConvexProviderWithAuth0 client={convex}>
-          <Unauthenticated2>
+          <Unauthenticated>
             <LoginButton />
-          </Unauthenticated2>
-          <Authenticated2>
+          </Unauthenticated>
+          <Authenticated>
             <Component {...pageProps} />
-          </Authenticated2>
+          </Authenticated>
         </ConvexProviderWithAuth0>
       </Auth0Provider>
     </main>
