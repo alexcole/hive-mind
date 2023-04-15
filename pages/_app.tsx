@@ -43,7 +43,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         useRefreshTokens={true}
         cacheLocation="localstorage"
       >
-        <ConvexProviderWithAuth0 client={convex}>
+        <ConvexProviderWithAuth0 client={convex as any}>
           <Unauthenticated>
             <LoginButton />
           </Unauthenticated>
