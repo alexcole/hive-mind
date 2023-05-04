@@ -55,7 +55,7 @@ function SubmissionManager({ puzzleId }: { puzzleId: Id<'puzzles'> }) {
             event.preventDefault()
             setSubmission('')
             setSubmissionResponse(undefined)
-            setSubmissionResponse(await submit(puzzleId, submission))
+            setSubmissionResponse(await submit({ puzzleId, word: submission }))
           }}
         >
           Submit
@@ -110,7 +110,7 @@ function Response({
 }
 
 function Answers({ puzzleId }: { puzzleId: Id<'puzzles'> }) {
-  const submissions = useQuery('submissions:getStatus', puzzleId)
+  const submissions = useQuery('submissions:getStatus', { puzzleId })
 
   if (submissions === undefined) {
     return null

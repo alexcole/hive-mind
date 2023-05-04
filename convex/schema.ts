@@ -1,21 +1,22 @@
-import { defineSchema, defineTable, s } from 'convex/schema'
+import { defineSchema, defineTable } from 'convex/schema'
+import { v } from 'convex/values'
 
 export default defineSchema({
   users: defineTable({
-    name: s.string(),
-    tokenIdentifier: s.string(),
+    name: v.string(),
+    tokenIdentifier: v.string(),
   }).index('by_token', ['tokenIdentifier']),
 
   submissions: defineTable({
-    word: s.string(),
-    puzzleId: s.id('puzzles'),
-    submitterId: s.id('users'),
+    word: v.string(),
+    puzzleId: v.id('puzzles'),
+    submitterId: v.id('users'),
   }).index('by_puzzle', ['puzzleId', 'word']),
 
   puzzles: defineTable({
-    letters: s.array(s.string()),
-    centerLetter: s.string(),
-    answers: s.array(s.string()),
-    dateTimestamp: s.string(),
+    letters: v.array(v.string()),
+    centerLetter: v.string(),
+    answers: v.array(v.string()),
+    dateTimestamp: v.string(),
   }).index('by_dateTimestamp', ['dateTimestamp']),
 })

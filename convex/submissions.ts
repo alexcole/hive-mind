@@ -1,49 +1,55 @@
+import { v } from 'convex/values'
 import { getCurrentUser } from './users'
 import { Id } from './_generated/dataModel'
 import { mutation, query } from './_generated/server'
 
-export const getStatus = query(async ({ db }, puzzleId: Id<'puzzles'>) => {
-  const submissions = await db
-    .query('submissions')
-    .withIndex('by_puzzle', (q) => q.eq('puzzleId', puzzleId))
-    .collect()
+export const getStatus = query({
+  args: {
+    puzzleId: v.id('puzzles'),
+  },
+  handler: async ({ db }, { puzzleId }) => {
+    const submissions = await db
+      .query('submissions')
+      .withIndex('by_puzzle', (q) => q.eq('puzzleId', puzzleId))
+      .collect()
 
-  let totalScore = 0
-  const scoreById = new Map<string, number>()
+    let totalScore = 0
+    const scoreById = new Map<string, number>()
 
-  for (const submission of submissions) {
-    const submitterId = submission.submitterId.toString()
-    const points = score(submission.word)
-    totalScore += points
-    if (scoreById.has(submitterId)) {
-      scoreById.set(submitterId, scoreById.get(submitterId)! + points)
-    } else {
-      scoreById.set(submitterId, points)
-    }
-  }
-
-  const pointsByName = await Promise.all(
-    Array.from(scoreById.entries()).map(async ([submitterId, points]) => {
-      const submitter = (await db.get(new Id('users', submitterId)))!
-      return {
-        name: submitter.name,
-        points,
-        id: submitterId,
+    for (const submission of submissions) {
+      const submitterId = submission.submitterId.toString()
+      const points = score(submission.word)
+      totalScore += points
+      if (scoreById.has(submitterId)) {
+        scoreById.set(submitterId, scoreById.get(submitterId)! + points)
+      } else {
+        scoreById.set(submitterId, points)
       }
+    }
+
+    const pointsByName = await Promise.all(
+      Array.from(scoreById.entries()).map(async ([submitterId, points]) => {
+        const submitter = (await db.get(new Id('users', submitterId)))!
+        return {
+          name: submitter.name,
+          points,
+          id: submitterId,
+        }
+      })
+    )
+    pointsByName.sort((entry1, entry2) => {
+      return entry2.points - entry1.points
     })
-  )
-  pointsByName.sort((entry1, entry2) => {
-    return entry2.points - entry1.points
-  })
 
-  const words = submissions.map((submission) => submission.word)
-  words.sort()
+    const words = submissions.map((submission) => submission.word)
+    words.sort()
 
-  return {
-    pointsByName,
-    totalScore,
-    words,
-  }
+    return {
+      pointsByName,
+      totalScore,
+      words,
+    }
+  },
 })
 
 export function isPangram(word: string) {
@@ -75,12 +81,13 @@ export type SubmissionResponse =
         | 'already-submitted'
     }
 
-export const submit = mutation(
-  async (
-    ctx,
-    puzzleId: Id<'puzzles'>,
-    word: string
-  ): Promise<SubmissionResponse> => {
+export const submit = mutation({
+  args: {
+    puzzleId: v.id('puzzles'),
+    word: v.string(),
+  },
+
+  handler: async (ctx, { puzzleId, word }): Promise<SubmissionResponse> => {
     const { db } = ctx
     const puzzle = (await db.get(puzzleId))!
     const upperWord = word.toUpperCase()
@@ -139,5 +146,5 @@ export const submit = mutation(
     return {
       result: 'correct',
     }
-  }
-)
+  },
+})
